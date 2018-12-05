@@ -1,0 +1,103 @@
+#include <stdio.h>
+
+struct node {
+    int key;
+    struct node *left;
+    struct node *right;
+};
+
+struct binary_search_tree {
+    struct node *root;
+};
+
+struct stack {
+    int *stackArray;
+    int up;
+    int capacity;
+};
+
+void nonRecursivePreOrder(int *dizi, int elemanSayisi) {
+    struct binary_search_tree *tree = (struct binary_search_tree*)malloc(sizeof(struct binary_search_tree));
+    if(tree==NULL) {
+        printf("Heapte gerekli yer ayrilamadi... exit ...\n");
+        exit(1);
+    }
+    tree->root=NULL;
+
+    for(int i=0; i<elemanSayisi; i++) {
+        struct node *d = (struct node*)malloc(sizeof(struct node));
+        struct node *ptr;
+        if(d==NULL) {
+            printf("Heapte gerekli yer ayrilamadi... exit ...\n");
+            exit(1);
+        }
+        d->key = *(dizi+i);
+        d->left=d->right=NULL;
+        if(i==0){
+            tree->root=d;
+        }
+        ptr=tree->root;
+        while(i!=0 && ptr!=NULL) {
+            if(d->key > ptr->key) {
+                if(ptr->right==NULL) {
+                    ptr->right=d;
+                }
+                ptr=ptr->right;
+            }
+            else if(d->key < ptr->key) {
+                if(ptr->left==NULL) {
+                    ptr->left=d;
+                }
+                ptr=ptr->left;
+            }
+            else break;
+        }
+    }
+
+    if(elemanSayisi<=0) {
+        printf("Kapasite pozitif bir tam sayi olmali... ");
+        exit(1);
+    }
+    struct node *x = tree->root;
+    struct stack *y = (struct stack*)malloc(sizeof(struct stack));
+    y->stackArray = (int *)malloc(elemanSayisi*sizeof(int));
+    y->up = -1;
+    y->capacity = elemanSayisi;
+
+    y->stackArray[++y->up] = x->key;
+    while(y->up>-1) {
+        printf("%d ", y->stackArray[y->up]);
+        y->up--;
+        if(x->right!=NULL){
+            y->stackArray[++y->up] = x->right->key;
+        }
+        if(x->left!=NULL){
+            y->stackArray[++y->up] = x->left->key;
+            x=x->left;
+        }
+        else if(x->left==NULL && x->right!=NULL) {
+            x=x->right;
+        }
+        else if(x->left==NULL && x->right==NULL) {
+            free(x);
+            x=tree->root;
+            if(y->up==-1) break;
+            while(x->key != y->stackArray[y->up]){
+                if(x->key > y->stackArray[y->up]){
+                    x=x->left;
+                }
+                if(x->key < y->stackArray[y->up]){
+                    x=x->right;
+                }
+            }
+        }
+    }
+}
+
+int main()
+{
+    int dizi[]={40,30,52,22,35,50,68,20,25};
+    nonRecursivePreOrder(&dizi,9);
+    
+    return 0;
+}
